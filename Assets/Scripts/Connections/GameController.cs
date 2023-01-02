@@ -17,10 +17,6 @@ public enum GameState
 }
 
 [Serializable] public class CustomDictionary<TKey, TValue> : SerializableDictionary<TKey, TValue> { }
-
-/// <summary>
-/// Game Manager Class
-/// </summary>
 public class GameController : MonoBehaviour, INetworkRunnerCallbacks
 {
   public GameState CurrentGameState { get; private set; }
@@ -159,20 +155,6 @@ public class GameController : MonoBehaviour, INetworkRunnerCallbacks
     }
   }
 
-  public void OnCustomAuthenticationResponse()
-  {
-
-  }
-
-  /// <summary>
-  /// Start the Fusion simulation on a particular NetworkRunner
-  /// </summary>
-  /// <param name="runner">NetworkRunner to start the simulation</param>
-  /// <param name="gameMode">GameMode used to start the Runner</param>
-  /// <param name="connectionToken">Connection Token used to identify a particular Client</param>
-  /// <param name="migrationToken">[Optional] Host Migration Token</param>
-  /// <param name="migrationResume">[Optional] Host Migration Resume Callback</param>
-  /// <returns></returns>
   Task<StartGameResult> StartSimulation(NetworkRunner runner, GameMode gameMode, byte[] connectionToken, HostMigrationToken migrationToken = null, Action<NetworkRunner> migrationResume = null)
   {
 
@@ -187,11 +169,6 @@ public class GameController : MonoBehaviour, INetworkRunnerCallbacks
     });
   }
 
-  /// <summary>
-  /// Create a new NetworkRunner instance
-  /// </summary>
-  /// <param name="name">Runner Name</param>
-  /// <returns>A reference to a new NetworkRunner</returns>
   NetworkRunner GetRunner(string name)
   {
     var runner = Instantiate(_runnerPrefab);
@@ -202,12 +179,6 @@ public class GameController : MonoBehaviour, INetworkRunnerCallbacks
     return runner;
   }
 
-  /// <summary>
-  /// Get the Connection Token hash associated with a particular PlayerRef
-  /// </summary>
-  /// <param name="runner">NetworkRunner to check for the Connection Token</param>
-  /// <param name="player">PlayerRef to get the associated token</param>
-  /// <returns>Connection Token Hash, or 0 if not found or invalid</returns>
   int GetPlayerToken(NetworkRunner runner, PlayerRef player)
   {
     if (runner.LocalPlayer == player)
@@ -313,32 +284,6 @@ public class GameController : MonoBehaviour, INetworkRunnerCallbacks
 
     _playersMap.Clear();
     _playerCharacterMap.Clear();
-
-    // if (Application.isPlaying && ShutdownReason.Ok == shutdownReason)
-    // {
-
-    //   Destroy(_instanceRunner);
-    //   _instanceRunner = null;
-
-    //   Debug.Log("is Instance runner deleted : " + _instanceRunner);
-    //   _instanceRunner = GetRunner("Reinitialize Runner");
-
-    //   var result = await StartSimulation(
-    //     _instanceRunner,
-    //     GameMode.AutoHostOrClient,
-    //     _connectionToken,
-    //     migrationResume: HostMigrationResume);
-
-    //   if (result.Ok == false)
-    //   {
-    //     Debug.LogWarning(result.ShutdownReason);
-    //     ChangeGameState(GameState.Idle);
-    //   }
-    //   else
-    //   {
-    //     Debug.Log("Done");
-    //   }
-    // }
 
     // Reload scene after shutdown
     if (Application.isPlaying && shutdownReason != ShutdownReason.HostMigration)
