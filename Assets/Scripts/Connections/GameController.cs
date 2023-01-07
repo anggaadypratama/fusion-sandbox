@@ -229,9 +229,12 @@ public class GameController : MonoBehaviour, INetworkRunnerCallbacks
         var playerInstance = runner.Spawn(_playerPrefab, pos, Quaternion.identity, inputAuthority: player, onBeforeSpawned: (runner, obj) =>
         {
           obj.GetBehaviour<NetworkPlayer>().Token = playerToken;
-          var inputPlayer = obj.GetComponent<StarterAssetsInputs>();
 
-          if (inputPlayer != null) inputAsset = inputPlayer;
+          if (obj.GetComponent<NetworkBehaviour>().HasInputAuthority)
+          {
+            var inputPlayer = obj.GetComponent<StarterAssetsInputs>();
+            if (inputPlayer != null) inputAsset = inputPlayer;
+          }
         });
 
         // Store player ref

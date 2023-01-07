@@ -111,6 +111,8 @@ namespace StarterAssets
 
     private bool _hasAnimator;
 
+    private NetworkInputData networkData = new NetworkInputData();
+
     private bool IsCurrentDeviceMouse
     {
       get
@@ -163,16 +165,19 @@ namespace StarterAssets
       if (GetInput<NetworkInputData>(out var data))
       {
 
+        networkData = data;
+
         Debug.Log(data.move + " GetInput");
+
         JumpAndGravity(data);
         GroundedCheck();
         Move(data);
-        CameraRotation(data);
       }
     }
 
     private void LateUpdate()
     {
+      CameraRotation(networkData);
     }
 
     private void AssignAnimationIDs()

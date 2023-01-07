@@ -702,9 +702,7 @@ MonoBehaviour:
   _playerPrefab: {fileID: -1176570980466996490, guid: 64dce48905ffd9b4293e595fa6941544, type: 3}
   inputAsset: {fileID: 0}
   _playersMap:
-    _items:
-    - Key: 0
-      Value: {fileID: 0}
+    _items: []
   _playerCharacterMap:
     _items: []
 --- !u!1 &1764214107
