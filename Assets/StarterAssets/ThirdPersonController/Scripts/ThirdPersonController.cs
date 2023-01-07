@@ -104,7 +104,7 @@ namespace StarterAssets
 #endif
     private Animator _animator;
     private CharacterController _controller;
-    private StarterAssetsInputs _input;
+    // private StarterAssetsInputs _input;
     private GameObject _mainCamera;
 
     private const float _threshold = 0.01f;
@@ -139,7 +139,7 @@ namespace StarterAssets
 
       _hasAnimator = TryGetComponent(out _animator);
       _controller = GetComponent<CharacterController>();
-      _input = GetComponent<StarterAssetsInputs>();
+      // _input = GetComponent<StarterAssetsInputs>();
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
       _playerInput = GetComponent<PlayerInput>();
 #else
@@ -156,18 +156,23 @@ namespace StarterAssets
     private void Update()
     {
       _hasAnimator = TryGetComponent(out _animator);
+    }
 
-      if (Object.HasInputAuthority)
+    public override void FixedUpdateNetwork()
+    {
+      if (GetInput<NetworkInputData>(out var data))
       {
-        JumpAndGravity();
+
+        Debug.Log(data.move + " GetInput");
+        JumpAndGravity(data);
         GroundedCheck();
-        Move();
+        Move(data);
+        CameraRotation(data);
       }
     }
 
     private void LateUpdate()
     {
-      CameraRotation();
     }
 
     private void AssignAnimationIDs()
@@ -194,7 +199,7 @@ namespace StarterAssets
       }
     }
 
-    private void CameraRotation()
+    private void CameraRotation(NetworkInputData _input)
     {
       // if there is an input and camera position is not fixed
       if (_input.look.sqrMagnitude >= _threshold && !LockCameraPosition)
@@ -215,7 +220,7 @@ namespace StarterAssets
           _cinemachineTargetYaw, 0.0f);
     }
 
-    private void Move()
+    private void Move(NetworkInputData _input)
     {
       // set target speed based on move speed, sprint speed and if sprint is pressed
       float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
@@ -283,7 +288,7 @@ namespace StarterAssets
       }
     }
 
-    private void JumpAndGravity()
+    private void JumpAndGravity(NetworkInputData _input)
     {
       if (Grounded)
       {

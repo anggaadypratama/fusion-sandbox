@@ -2,12 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Threading.Tasks;
 using Fusion.Sockets;
-using Fusion.Photon.Realtime;
 using System;
 using UnityEngine.SceneManagement;
 using StarterAssets;
 using Fusion;
-using Cinemachine;
 
 public enum GameState
 {
@@ -31,12 +29,6 @@ public class GameController : MonoBehaviour, INetworkRunnerCallbacks
 
       return _instance;
     }
-  }
-
-  public struct KeyValue<K, V>
-  {
-    public K key;
-    public V value;
   }
 
   [Header("Prefabs")]
@@ -378,7 +370,23 @@ public class GameController : MonoBehaviour, INetworkRunnerCallbacks
     Debug.Log("Resume Simulation DONE");
   }
 
-  public void OnInput(NetworkRunner runner, NetworkInput input) { }
+  public void OnInput(NetworkRunner runner, NetworkInput input)
+  {
+    if (inputAsset != null)
+    {
+      var data = new NetworkInputData();
+
+      Debug.Log(inputAsset.move + " OnInput");
+
+      data.move = inputAsset.move;
+      data.jump = inputAsset.jump;
+      data.sprint = inputAsset.sprint;
+      data.analogMovement = inputAsset.analogMovement;
+      data.look = inputAsset.look;
+
+      input.Set(data);
+    }
+  }
   public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
   public void OnConnectedToServer(NetworkRunner runner) { }
   public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }

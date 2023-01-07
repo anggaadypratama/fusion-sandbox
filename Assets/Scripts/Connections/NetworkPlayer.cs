@@ -33,7 +33,7 @@ public class NetworkPlayer : NetworkBehaviour
 
   private void OnTriggerEnter(Collider other)
   {
-    Debug.Log(Runner);
+    // Debug.Log(Runner.MoveToRunnerScene);
     // networkSceneManager
   }
 
@@ -54,12 +54,12 @@ public class NetworkPlayer : NetworkBehaviour
     }
   }
 
-  public override void FixedUpdateNetwork()
-  {
-    if (GetInput(out NetworkInputData data))
-    {
-      Debug.Log("Player : " + data.Direction);
-      input.move = data.Direction;
-    }
-  }
+  // public override void FixedUpdateNetwork()
+  // {
+  //   if (GetInput(out NetworkInputData data))
+  //   {
+  //     Debug.Log("Player : " + data.move);
+  //     input.move = data.move;
+  //   }
+  // }
 }
