@@ -36,10 +36,8 @@ public class GameController : MonoBehaviour, INetworkRunnerCallbacks
   [SerializeField] private NetworkObject _playerPrefab;
   [SerializeField] StarterAssetsInputs inputAsset;
 
-  [Header("User Info")]
-  public CustomDictionary<int, NetworkObject> _playersMap;
-  [Space(20)]
-  public CustomDictionary<PlayerRef, NetworkObject> _playerCharacterMap;
+  [Networked] public CustomDictionary<int, NetworkObject> _playersMap { get; set; }
+  [Networked] public CustomDictionary<PlayerRef, NetworkObject> _playerCharacterMap { get; set; }
   [Space(20)]
 
   private static GameController _instance;
@@ -200,8 +198,6 @@ public class GameController : MonoBehaviour, INetworkRunnerCallbacks
 
       Debug.Log($"Player Joined with token {playerToken}");
 
-      Debug.Log("check token : " + _playersMap.ContainsKey(playerToken));
-
       if (_playersMap.TryGetValue(playerToken, out var NetworkPlayer))
       {
         Debug.Log("Taking control over pre-created Player");
@@ -230,20 +226,31 @@ public class GameController : MonoBehaviour, INetworkRunnerCallbacks
         {
           obj.GetBehaviour<NetworkPlayer>().Token = playerToken;
 
-          if (obj.GetComponent<NetworkBehaviour>().HasInputAuthority)
+          if (obj.HasInputAuthority)
           {
-            var inputPlayer = obj.GetComponent<StarterAssetsInputs>();
-            if (inputPlayer != null) inputAsset = inputPlayer;
+            var charaInput = obj.GetComponent<StarterAssetsInputs>();
+            if (charaInput != null) inputAsset = charaInput;
           }
         });
+
+        runner.SetPlayerObject(player, playerInstance);
 
         // Store player ref
         _playersMap[playerToken] = playerInstance;
         _playerCharacterMap[player] = playerInstance;
       }
 
-
       Log.Warn("Spawn in ClientServer Mode");
+    }
+
+    if (_playerPrefab != null && runner.IsClient)
+    {
+      if (runner.TryGetPlayerObject(player, out var plObject))
+      {
+        Debug.Log(plObject);
+        var charaInput = plObject.GetComponent<StarterAssetsInputs>();
+        if (charaInput != null) inputAsset = charaInput;
+      }
     }
   }
 
@@ -379,7 +386,7 @@ public class GameController : MonoBehaviour, INetworkRunnerCallbacks
     {
       var data = new NetworkInputData();
 
-      Debug.Log(inputAsset.move + " OnInput");
+      // Debug.Log(inputAsset.move + " OnInput");
 
       data.move = inputAsset.move;
       data.jump = inputAsset.jump;

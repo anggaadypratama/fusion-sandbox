@@ -1387,7 +1387,7 @@ MonoBehaviour:
   camTarget: {fileID: 8338988566280778637}
   cam: {fileID: 0}
   inputMobile: {fileID: 0}
-  Token: 0
+  _Token: 0
 --- !u!1 &4523139366846529165
 GameObject:
   m_ObjectHideFlags: 0

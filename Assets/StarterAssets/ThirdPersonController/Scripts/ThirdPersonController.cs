@@ -166,8 +166,7 @@ namespace StarterAssets
       {
 
         networkData = data;
-
-        Debug.Log(data.move + " GetInput");
+        // Debug.Log(data.move + " GetInput");
 
         JumpAndGravity(data);
         GroundedCheck();
