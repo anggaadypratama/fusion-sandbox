@@ -43,6 +43,8 @@ public class GameController : MonoBehaviour, INetworkRunnerCallbacks
   private static GameController _instance;
   private NetworkRunner _instanceRunner;
   private byte[] _connectionToken;
+  private bool isPlayerAssignController;
+  public NetworkObject playerInstance;
 
   List<int> _pendingTokens;
   System.Diagnostics.Stopwatch _watch = new System.Diagnostics.Stopwatch();
@@ -114,6 +116,22 @@ public class GameController : MonoBehaviour, INetworkRunnerCallbacks
         }
 
         _pendingTokens.Clear();
+      }
+    }
+
+    if (_playerPrefab != null && _instanceRunner.IsClient)
+    {
+      if (!isPlayerAssignController)
+      {
+        if (_instanceRunner.TryGetPlayerObject(_instanceRunner.LocalPlayer, out var plObject))
+        {
+          Debug.Log(plObject);
+          var charaInput = plObject.GetComponent<StarterAssetsInputs>();
+          if (charaInput != null) inputAsset = charaInput;
+
+          isPlayerAssignController = inputAsset != null;
+        }
+
       }
     }
   }
@@ -222,9 +240,11 @@ public class GameController : MonoBehaviour, INetworkRunnerCallbacks
         pos.y = 1;
 
         // Spawn a new Player
-        var playerInstance = runner.Spawn(_playerPrefab, pos, Quaternion.identity, inputAuthority: player, onBeforeSpawned: (runner, obj) =>
+        playerInstance = runner.Spawn(_playerPrefab, pos, Quaternion.identity, inputAuthority: player, onBeforeSpawned: (runner, obj) =>
         {
-          obj.GetBehaviour<NetworkPlayer>().Token = playerToken;
+          var networkPlayer = obj.GetBehaviour<NetworkPlayer>();
+          networkPlayer.Token = playerToken;
+          networkPlayer.Player = player;
 
           if (obj.HasInputAuthority)
           {
@@ -242,17 +262,8 @@ public class GameController : MonoBehaviour, INetworkRunnerCallbacks
 
       Log.Warn("Spawn in ClientServer Mode");
     }
-
-    if (_playerPrefab != null && runner.IsClient)
-    {
-      if (runner.TryGetPlayerObject(player, out var plObject))
-      {
-        Debug.Log(plObject);
-        var charaInput = plObject.GetComponent<StarterAssetsInputs>();
-        if (charaInput != null) inputAsset = charaInput;
-      }
-    }
   }
+
 
   public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
   {
@@ -367,6 +378,9 @@ public class GameController : MonoBehaviour, INetworkRunnerCallbacks
 
         if (newNO.TryGetBehaviour<NetworkPlayer>(out var NetworkPlayer))
         {
+          var charaInput = newNO.GetComponent<StarterAssetsInputs>();
+          if (charaInput != null) inputAsset = charaInput;
+
           // Store Player for reconnection
           _playersMap[NetworkPlayer.Token] = newNO;
           _pendingTokens.Add(NetworkPlayer.Token);
@@ -398,7 +412,9 @@ public class GameController : MonoBehaviour, INetworkRunnerCallbacks
     }
   }
   public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
-  public void OnConnectedToServer(NetworkRunner runner) { }
+  public void OnConnectedToServer(NetworkRunner runner)
+  {
+  }
   public void OnConnectRequest(NetworkRunner runner, NetworkRunnerCallbackArgs.ConnectRequest request, byte[] token) { }
   public void OnUserSimulationMessage(NetworkRunner runner, SimulationMessagePtr message) { }
   public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList) { }

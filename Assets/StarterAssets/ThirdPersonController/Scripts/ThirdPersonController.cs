@@ -93,11 +93,11 @@ namespace StarterAssets
     private float _fallTimeoutDelta;
 
     // animation IDs
-    private int _animIDSpeed;
-    private int _animIDGrounded;
-    private int _animIDJump;
-    private int _animIDFreeFall;
-    private int _animIDMotionSpeed;
+    [Networked] public int _animIDSpeed { get; set; }
+    [Networked] private int _animIDGrounded { get; set; }
+    [Networked] private int _animIDJump { get; set; }
+    [Networked] private int _animIDFreeFall { get; set; }
+    [Networked] private int _animIDMotionSpeed { get; set; }
 
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
     private PlayerInput _playerInput;
@@ -120,7 +120,7 @@ namespace StarterAssets
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
         return _playerInput.currentControlScheme == "KeyboardMouse";
 #else
-				return false;
+        return false;
 #endif
       }
     }
@@ -145,7 +145,7 @@ namespace StarterAssets
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
       _playerInput = GetComponent<PlayerInput>();
 #else
-			Debug.LogError( "Starter Assets package is missing dependencies. Please use Tools/Starter Assets/Reinstall Dependencies to fix it");
+      Debug.LogError("Starter Assets package is missing dependencies. Please use Tools/Starter Assets/Reinstall Dependencies to fix it");
 #endif
 
       AssignAnimationIDs();
@@ -162,11 +162,9 @@ namespace StarterAssets
 
     public override void FixedUpdateNetwork()
     {
-      if (GetInput<NetworkInputData>(out var data))
+      if (Object.HasStateAuthority && GetInput<NetworkInputData>(out var data))
       {
-
         networkData = data;
-        // Debug.Log(data.move + " GetInput");
 
         JumpAndGravity(data);
         GroundedCheck();

@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Networking;
 using Fusion;
 using StarterAssets;
 using Cinemachine;
@@ -11,6 +10,7 @@ public class NetworkPlayer : NetworkBehaviour
   public CinemachineVirtualCamera cam;
   public UICanvasControllerInput inputMobile;
   [Networked] public int Token { get; set; }
+  [Networked] public PlayerRef Player { get; set; }
 
   private void Awake()
   {
@@ -31,12 +31,6 @@ public class NetworkPlayer : NetworkBehaviour
     Debug.Log("Object reset");
   }
 
-  private void OnTriggerEnter(Collider other)
-  {
-    // Debug.Log(Runner.MoveToRunnerScene);
-    // networkSceneManager
-  }
-
   public void OnAssignObject()
   {
     cam = GameObject.FindObjectOfType<CinemachineVirtualCamera>();
@@ -53,13 +47,4 @@ public class NetworkPlayer : NetworkBehaviour
 
     }
   }
-
-  // public override void FixedUpdateNetwork()
-  // {
-  //   if (GetInput(out NetworkInputData data))
-  //   {
-  //     Debug.Log("Player : " + data.move);
-  //     input.move = data.move;
-  //   }
-  // }
 }
