@@ -102,7 +102,8 @@ namespace StarterAssets
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
     private PlayerInput _playerInput;
 #endif
-    private Animator _animator;
+    // private Animator _networkMecanimAnimator;
+    private NetworkMecanimAnimator _networkMecanimAnimator;
     private CharacterController _controller;
     // private StarterAssetsInputs _input;
     private GameObject _mainCamera;
@@ -139,7 +140,8 @@ namespace StarterAssets
     {
       _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
 
-      _hasAnimator = TryGetComponent(out _animator);
+      _networkMecanimAnimator = GetComponent<NetworkMecanimAnimator>();
+      _hasAnimator = TryGetComponent(out _networkMecanimAnimator.Animator);
       _controller = GetComponent<CharacterController>();
       // _input = GetComponent<StarterAssetsInputs>();
 #if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
@@ -157,7 +159,7 @@ namespace StarterAssets
 
     private void Update()
     {
-      _hasAnimator = TryGetComponent(out _animator);
+      _hasAnimator = TryGetComponent(out _networkMecanimAnimator.Animator);
     }
 
     public override void FixedUpdateNetwork()
@@ -175,6 +177,12 @@ namespace StarterAssets
     private void LateUpdate()
     {
       CameraRotation(networkData);
+    }
+
+
+    public void OnAnimRun()
+    {
+
     }
 
     private void AssignAnimationIDs()
@@ -197,7 +205,7 @@ namespace StarterAssets
       // update animator if using character
       if (_hasAnimator)
       {
-        _animator.SetBool(_animIDGrounded, Grounded);
+        _networkMecanimAnimator.Animator.SetBool(_animIDGrounded, Grounded);
       }
     }
 
@@ -285,8 +293,8 @@ namespace StarterAssets
       // update animator if using character
       if (_hasAnimator)
       {
-        _animator.SetFloat(_animIDSpeed, _animationBlend);
-        _animator.SetFloat(_animIDMotionSpeed, inputMagnitude);
+        _networkMecanimAnimator.Animator.SetFloat(_animIDSpeed, _animationBlend);
+        _networkMecanimAnimator.Animator.SetFloat(_animIDMotionSpeed, inputMagnitude);
       }
     }
 
@@ -300,8 +308,8 @@ namespace StarterAssets
         // update animator if using character
         if (_hasAnimator)
         {
-          _animator.SetBool(_animIDJump, false);
-          _animator.SetBool(_animIDFreeFall, false);
+          _networkMecanimAnimator.Animator.SetBool(_animIDJump, false);
+          _networkMecanimAnimator.Animator.SetBool(_animIDFreeFall, false);
         }
 
         // stop our velocity dropping infinitely when grounded
@@ -319,7 +327,7 @@ namespace StarterAssets
           // update animator if using character
           if (_hasAnimator)
           {
-            _animator.SetBool(_animIDJump, true);
+            _networkMecanimAnimator.Animator.SetBool(_animIDJump, true);
           }
         }
 
@@ -344,7 +352,7 @@ namespace StarterAssets
           // update animator if using character
           if (_hasAnimator)
           {
-            _animator.SetBool(_animIDFreeFall, true);
+            _networkMecanimAnimator.Animator.SetBool(_animIDFreeFall, true);
           }
         }
 
