@@ -701,6 +701,7 @@ MonoBehaviour:
   _runnerPrefab: {fileID: 2840131908187035363, guid: 484dd061a6e164271b717f277cddd866, type: 3}
   _playerPrefab: {fileID: -1176570980466996490, guid: 64dce48905ffd9b4293e595fa6941544, type: 3}
   inputAsset: {fileID: 0}
+  playerInstance: {fileID: 0}
 --- !u!1 &1764214107
 GameObject:
   m_ObjectHideFlags: 0

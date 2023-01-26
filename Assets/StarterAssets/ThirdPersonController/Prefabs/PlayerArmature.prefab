@@ -1117,6 +1117,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _interpolationDataSource: 0
+  InterpolationSpace: 0
+  InterpolationTarget: {fileID: 6392546784736076633}
+  InterpolateErrorCorrection: 1
+  InterpolatedErrorCorrectionSettings:
+    MinRate: 3.3
+    MaxRate: 10
+    PosBlendStart: 0.25
+    PosBlendEnd: 1
+    PosMinCorrection: 0.025
+    PosTeleportDistance: 2
+    RotBlendStart: 0.1
+    RotBlendEnd: 0.5
+    RotTeleportRadians: 1.5
+  UseLegacySharedModeInterpolation: 0
+  TargetInterpolationDelay: 0.03
   MoveSpeed: 2
   SprintSpeed: 5.335
   RotationSmoothTime: 0.12
@@ -1138,7 +1153,7 @@ MonoBehaviour:
   Gravity: -15
   JumpTimeout: 0.3
   FallTimeout: 0.15
-  Grounded: 1
+  _Grounded: 0
   GroundedOffset: -0.14
   GroundedRadius: 0.28
   GroundLayers:
@@ -1149,6 +1164,19 @@ MonoBehaviour:
   BottomClamp: -30
   CameraAngleOverride: 0
   LockCameraPosition: 0
+  _animationBlend: 0
+  _inputMagnitude: 0
+  _isJump:
+    _value: 0
+  _isAnimJump:
+    _value: 0
+  _isAnimFreeFall:
+    _value: 0
+  _animIDSpeed: 0
+  _animIDGrounded: 0
+  _animIDJump: 0
+  _animIDFreeFall: 0
+  _animIDMotionSpeed: 0
 --- !u!114 &5885216827943657505
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1326,9 +1354,9 @@ MonoBehaviour:
   m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _interpolationDataSource: 0
+  _interpolationDataSource: 2
   InterpolationSpace: 0
-  InterpolationTarget: {fileID: 8002264680419333305}
+  InterpolationTarget: {fileID: 6392546784736076633}
   InterpolateErrorCorrection: 1
   InterpolatedErrorCorrectionSettings:
     MinRate: 3.3

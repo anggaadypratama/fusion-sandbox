@@ -237,7 +237,7 @@ public class GameController : MonoBehaviour, INetworkRunnerCallbacks
 
         // random position
         var pos = UnityEngine.Random.insideUnitSphere * 3;
-        pos.y = 1;
+        pos.y = 0;
 
         // Spawn a new Player
         playerInstance = runner.Spawn(_playerPrefab, pos, Quaternion.identity, inputAuthority: player, onBeforeSpawned: (runner, obj) =>

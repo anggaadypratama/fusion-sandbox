@@ -6,13 +6,14 @@ using UnityEngine;
 [OrderBefore(typeof(NetworkTransform))]
 [DisallowMultipleComponent]
 // ReSharper disable once CheckNamespace
-public class NetworkCharacterControllerPrototype : NetworkTransform {
+public class NetworkCharacterControllerPrototype : NetworkTransform
+{
   [Header("Character Controller Settings")]
-  public float gravity       = -20.0f;
-  public float jumpImpulse   = 8.0f;
-  public float acceleration  = 10.0f;
-  public float braking       = 10.0f;
-  public float maxSpeed      = 2.0f;
+  public float gravity = -20.0f;
+  public float jumpImpulse = 8.0f;
+  public float acceleration = 10.0f;
+  public float braking = 10.0f;
+  public float maxSpeed = 2.0f;
   public float rotationSpeed = 15.0f;
 
   [Networked]
@@ -37,25 +38,30 @@ public class NetworkCharacterControllerPrototype : NetworkTransform {
 
   public CharacterController Controller { get; private set; }
 
-  protected override void Awake() {
+  protected override void Awake()
+  {
     base.Awake();
     CacheController();
   }
 
-  public override void Spawned() {
+  public override void Spawned()
+  {
     base.Spawned();
     CacheController();
   }
 
-  private void CacheController() {
-    if (Controller == null) {
+  private void CacheController()
+  {
+    if (Controller == null)
+    {
       Controller = GetComponent<CharacterController>();
 
       Assert.Check(Controller != null, $"An object with {nameof(NetworkCharacterControllerPrototype)} must also have a {nameof(CharacterController)} component.");
     }
   }
 
-  protected override void CopyFromBufferToEngine() {
+  protected override void CopyFromBufferToEngine()
+  {
     // Trick: CC must be disabled before resetting the transform state
     Controller.enabled = false;
 
@@ -71,11 +77,13 @@ public class NetworkCharacterControllerPrototype : NetworkTransform {
   /// <param name="ignoreGrounded">Jump even if not in a grounded state.</param>
   /// <param name="overrideImpulse">Optional field to override the jump impulse. If null, <see cref="jumpImpulse"/> is used.</param>
   /// </summary>
-  public virtual void Jump(bool ignoreGrounded = false, float? overrideImpulse = null) {
-    if (IsGrounded || ignoreGrounded) {
+  public virtual void Jump(bool ignoreGrounded = false, float? overrideImpulse = null)
+  {
+    if (IsGrounded || ignoreGrounded)
+    {
       var newVel = Velocity;
       newVel.y += overrideImpulse ?? jumpImpulse;
-      Velocity =  newVel;
+      Velocity = newVel;
     }
   }
 
@@ -83,14 +91,16 @@ public class NetworkCharacterControllerPrototype : NetworkTransform {
   /// Basic implementation of a character controller's movement function based on an intended direction.
   /// <param name="direction">Intended movement direction, subject to movement query, acceleration and max speed values.</param>
   /// </summary>
-  public virtual void Move(Vector3 direction) {
-    var deltaTime    = Runner.DeltaTime;
-    var previousPos  = transform.position;
+  public virtual void Move(Vector3 direction)
+  {
+    var deltaTime = Runner.DeltaTime;
+    var previousPos = transform.position;
     var moveVelocity = Velocity;
 
     direction = direction.normalized;
 
-    if (IsGrounded && moveVelocity.y < 0) {
+    if (IsGrounded && moveVelocity.y < 0)
+    {
       moveVelocity.y = 0f;
     }
 
@@ -100,10 +110,13 @@ public class NetworkCharacterControllerPrototype : NetworkTransform {
     horizontalVel.x = moveVelocity.x;
     horizontalVel.z = moveVelocity.z;
 
-    if (direction == default) {
+    if (direction == default)
+    {
       horizontalVel = Vector3.Lerp(horizontalVel, default, braking * deltaTime);
-    } else {
-      horizontalVel      = Vector3.ClampMagnitude(horizontalVel + direction * acceleration * deltaTime, maxSpeed);
+    }
+    else
+    {
+      horizontalVel = Vector3.ClampMagnitude(horizontalVel + direction * acceleration * deltaTime, maxSpeed);
       transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), rotationSpeed * Runner.DeltaTime);
     }
 
@@ -112,7 +125,7 @@ public class NetworkCharacterControllerPrototype : NetworkTransform {
 
     Controller.Move(moveVelocity * deltaTime);
 
-    Velocity   = (transform.position - previousPos) * Runner.Simulation.Config.TickRate;
+    Velocity = (transform.position - previousPos) * Runner.Simulation.Config.TickRate;
     IsGrounded = Controller.isGrounded;
   }
 }
