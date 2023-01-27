@@ -1041,6 +1041,7 @@ GameObject:
   - component: {fileID: 8903818361444887242}
   - component: {fileID: -1176570980466996490}
   - component: {fileID: 6266335974925971880}
+  - component: {fileID: 869551264147627258}
   m_Layer: 0
   m_Name: PlayerArmature
   m_TagString: Player
@@ -1117,21 +1118,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _interpolationDataSource: 0
-  InterpolationSpace: 0
-  InterpolationTarget: {fileID: 6392546784736076633}
-  InterpolateErrorCorrection: 1
-  InterpolatedErrorCorrectionSettings:
-    MinRate: 3.3
-    MaxRate: 10
-    PosBlendStart: 0.25
-    PosBlendEnd: 1
-    PosMinCorrection: 0.025
-    PosTeleportDistance: 2
-    RotBlendStart: 0.1
-    RotBlendEnd: 0.5
-    RotTeleportRadians: 1.5
-  UseLegacySharedModeInterpolation: 0
-  TargetInterpolationDelay: 0.03
   MoveSpeed: 2
   SprintSpeed: 5.335
   RotationSmoothTime: 0.12
@@ -1167,10 +1153,6 @@ MonoBehaviour:
   _animationBlend: 0
   _inputMagnitude: 0
   _isJump:
-    _value: 0
-  _isAnimJump:
-    _value: 0
-  _isAnimFreeFall:
     _value: 0
   _animIDSpeed: 0
   _animIDGrounded: 0
@@ -1397,6 +1379,7 @@ MonoBehaviour:
   - {fileID: 7635106386755009147}
   - {fileID: 8903818361444887242}
   - {fileID: 6266335974925971880}
+  - {fileID: 869551264147627258}
   SimulationBehaviours: []
 --- !u!114 &6266335974925971880
 MonoBehaviour:
@@ -1416,6 +1399,21 @@ MonoBehaviour:
   cam: {fileID: 0}
   inputMobile: {fileID: 0}
   _Token: 0
+--- !u!114 &869551264147627258
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4416926081852918481}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72872188c080b844a9c9d1015cf8e60a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _interpolationDataSource: 0
+  DrawAreaOfInterestRadius: 0
+  Radius: 32
 --- !u!1 &4523139366846529165
 GameObject:
   m_ObjectHideFlags: 0

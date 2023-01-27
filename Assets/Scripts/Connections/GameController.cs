@@ -400,13 +400,13 @@ public class GameController : MonoBehaviour, INetworkRunnerCallbacks
     {
       var data = new NetworkInputData();
 
-      // Debug.Log(inputAsset.move + " OnInput");
-
       data.move = inputAsset.move;
       data.jump = inputAsset.jump;
       data.sprint = inputAsset.sprint;
       data.analogMovement = inputAsset.analogMovement;
       data.look = inputAsset.look;
+
+      Debug.Log("cameraRotation Controller : " + data.look);
 
       input.Set(data);
     }

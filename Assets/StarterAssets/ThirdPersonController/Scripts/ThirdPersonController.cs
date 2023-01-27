@@ -23,6 +23,7 @@ namespace StarterAssets
 
     [Tooltip("Sprint speed of the character in m/s")]
     public float SprintSpeed = 5.335f;
+    [Networked] public NetworkBool isPlayerSprint { get; set; }
 
     [Tooltip("How fast the character turns to face movement direction")]
     [Range(0.0f, 0.3f)]
@@ -50,6 +51,7 @@ namespace StarterAssets
     public float FallTimeout = 0.15f;
 
     [Tooltip("If the character is grounded or not. Not part of the CharacterController built in grounded check")]
+
     [Networked] public bool Grounded { get; set; }
 
     [Tooltip("Useful for rough ground")]
@@ -86,8 +88,6 @@ namespace StarterAssets
     [Networked] public float animationBlend { get; set; }
     [Networked] public float inputMagnitude { get; set; }
     [Networked] public NetworkBool isJump { get; set; }
-    [Networked] public NetworkBool isAnimJump { get; set; }
-    [Networked] public NetworkBool isAnimFreeFall { get; set; }
     // [Networked] public Vector3 moving { get; set; }
 
     public Interpolator<Vector3> NetMoveInterpolator;
@@ -114,7 +114,7 @@ namespace StarterAssets
     // private Animator _networkMecanimAnimator;
     private NetworkMecanimAnimator _networkMecanimAnimator;
     private CharacterController _controller;
-    // private StarterAssetsInputs _input;
+    private StarterAssetsInputs _localInput;
     private GameObject _mainCamera;
 
     private const float _threshold = 0.01f;
@@ -143,26 +143,6 @@ namespace StarterAssets
       }
     }
 
-    private void Start()
-    {
-      _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
-
-      _networkMecanimAnimator = GetComponent<NetworkMecanimAnimator>();
-      _hasAnimator = TryGetComponent(out _networkMecanimAnimator.Animator);
-      _controller = GetComponent<CharacterController>();
-#if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
-      _playerInput = GetComponent<PlayerInput>();
-#else
-      Debug.LogError("Starter Assets package is missing dependencies. Please use Tools/Starter Assets/Reinstall Dependencies to fix it");
-#endif
-
-      AssignAnimationIDs();
-
-      // reset our timeouts on start
-      _jumpTimeoutDelta = JumpTimeout;
-      _fallTimeoutDelta = FallTimeout;
-    }
-
     private void Update()
     {
       _hasAnimator = TryGetComponent(out _networkMecanimAnimator.Animator);
@@ -176,6 +156,7 @@ namespace StarterAssets
         {
           networkData = data;
 
+          GroundedCheck();
           JumpAndGravity(data);
           Move(data);
         }
@@ -185,13 +166,36 @@ namespace StarterAssets
     public override void Spawned()
     {
       base.Spawned();
+      CacheController();
+    }
+
+    private void CacheController()
+    {
       Grounded = true;
+
+      _cinemachineTargetYaw = CinemachineCameraTarget.transform.rotation.eulerAngles.y;
+
+      _networkMecanimAnimator = GetComponent<NetworkMecanimAnimator>();
+      _hasAnimator = TryGetComponent(out _networkMecanimAnimator.Animator);
+      _controller = GetComponent<CharacterController>();
+#if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
+      _playerInput = GetComponent<PlayerInput>();
+      _localInput = GetComponent<StarterAssetsInputs>();
+#else
+      Debug.LogError("Starter Assets package is missing dependencies. Please use Tools/Starter Assets/Reinstall Dependencies to fix it");
+#endif
+
+      AssignAnimationIDs();
+
+      // reset our timeouts on start
+      _jumpTimeoutDelta = JumpTimeout;
+      _fallTimeoutDelta = FallTimeout;
+
       // NetMoveInterpolator = GetInterpolator<Vector3>(nameof(moving));
     }
 
     public override void Render()
     {
-      GroundedCheck();
       // _controller.Move(NetMoveInterpolator.Value);
 
       if (_hasAnimator)
@@ -205,25 +209,17 @@ namespace StarterAssets
       {
         if (isJump)
         {
-          Debug.Log("Jumping");
           if (_hasAnimator)
           {
-            isAnimJump = true;
-            _networkMecanimAnimator.Animator.SetBool(_animIDJump, isAnimJump);
+            _networkMecanimAnimator.Animator.SetBool(_animIDJump, true);
           }
         }
         else
         {
           if (_hasAnimator)
           {
-
-            isAnimJump = false;
-            isAnimFreeFall = false;
-
-
-
-            _networkMecanimAnimator.Animator.SetBool(_animIDJump, isAnimJump);
-            _networkMecanimAnimator.Animator.SetBool(_animIDFreeFall, isAnimFreeFall);
+            _networkMecanimAnimator.Animator.SetBool(_animIDJump, false);
+            _networkMecanimAnimator.Animator.SetBool(_animIDFreeFall, false);
           }
 
 
@@ -233,17 +229,14 @@ namespace StarterAssets
       {
         if (_fallTimeoutDelta >= 0.0f)
         {
-          _fallTimeoutDelta -= Runner.DeltaTime;
+          _fallTimeoutDelta -= Time.deltaTime;
         }
         else
         {
           // update animator if using character
           if (_hasAnimator)
           {
-            Debug.Log("Falling");
-
-            isAnimFreeFall = true;
-            _networkMecanimAnimator.Animator.SetBool(_animIDFreeFall, isAnimFreeFall);
+            _networkMecanimAnimator.Animator.SetBool(_animIDFreeFall, true);
           }
         }
       }
@@ -251,7 +244,7 @@ namespace StarterAssets
 
     private void LateUpdate()
     {
-      CameraRotation(networkData);
+      CameraRotation();
     }
 
     private void AssignAnimationIDs()
@@ -268,16 +261,17 @@ namespace StarterAssets
       Grounded = _controller.isGrounded;
     }
 
-    private void CameraRotation(NetworkInputData _input)
+    private void CameraRotation()
     {
+      Debug.Log("cameraRotation Controller : " + _localInput.look);
       // if there is an input and camera position is not fixed
-      if (_input.look.sqrMagnitude >= _threshold && !LockCameraPosition)
+      if (_localInput.look.sqrMagnitude >= _threshold && !LockCameraPosition)
       {
-        //Don't multiply mouse input by Runner.DeltaTime;
-        float deltaTimeMultiplier = IsCurrentDeviceMouse ? 1.0f : Runner.DeltaTime;
+        //Don't multiply mouse input by Time.deltaTime;
+        float deltaTimeMultiplier = IsCurrentDeviceMouse ? 1.0f : Time.deltaTime;
 
-        _cinemachineTargetYaw += _input.look.x * deltaTimeMultiplier;
-        _cinemachineTargetPitch += _input.look.y * deltaTimeMultiplier;
+        _cinemachineTargetYaw += _localInput.look.x * deltaTimeMultiplier;
+        _cinemachineTargetPitch += _localInput.look.y * deltaTimeMultiplier;
       }
 
       // clamp our rotations so our values are limited 360 degrees
@@ -291,8 +285,10 @@ namespace StarterAssets
 
     private void Move(NetworkInputData _input)
     {
+      isPlayerSprint = _input.sprint;
+
       // set target speed based on move speed, sprint speed and if sprint is pressed
-      float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
+      float targetSpeed = isPlayerSprint ? SprintSpeed : MoveSpeed;
 
       // a simplistic acceleration and deceleration designed to be easy to remove, replace, or iterate upon
 
@@ -301,29 +297,32 @@ namespace StarterAssets
       if (_input.move == Vector2.zero) targetSpeed = 0.0f;
 
       // a reference to the players current horizontal velocity
-      float currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
-
-      float speedOffset = 0.1f;
-      inputMagnitude = _input.analogMovement ? _input.move.magnitude : 1f;
-
-      // accelerate or decelerate to target speed
-      if (currentHorizontalSpeed < targetSpeed - speedOffset ||
-          currentHorizontalSpeed > targetSpeed + speedOffset)
+      if (_controller != null)
       {
-        // creates curved result rather than a linear one giving a more organic speed change
-        // note T in Lerp is clamped, so we don't need to clamp our speed
-        _speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude,
-            Runner.DeltaTime * SpeedChangeRate);
+        float currentHorizontalSpeed = new Vector3(_controller.velocity.x, 0.0f, _controller.velocity.z).magnitude;
 
-        // round speed to 3 decimal places
-        _speed = Mathf.Round(_speed * 1000f) / 1000f;
-      }
-      else
-      {
-        _speed = targetSpeed;
+        float speedOffset = 0.1f;
+        inputMagnitude = _input.analogMovement ? _input.move.magnitude : 1f;
+
+        // accelerate or decelerate to target speed
+        if (currentHorizontalSpeed < targetSpeed - speedOffset ||
+            currentHorizontalSpeed > targetSpeed + speedOffset)
+        {
+          // creates curved result rather than a linear one giving a more organic speed change
+          // note T in Lerp is clamped, so we don't need to clamp our speed
+          _speed = Mathf.Lerp(currentHorizontalSpeed, targetSpeed * inputMagnitude,
+              Time.deltaTime * SpeedChangeRate);
+
+          // round speed to 3 decimal places
+          _speed = Mathf.Round(_speed * 1000f) / 1000f;
+        }
+        else
+        {
+          _speed = targetSpeed;
+        }
       }
 
-      animationBlend = Mathf.Lerp(animationBlend, targetSpeed, Runner.DeltaTime * SpeedChangeRate);
+      animationBlend = Mathf.Lerp(animationBlend, targetSpeed, Time.deltaTime * SpeedChangeRate);
       if (animationBlend < 0.01f) animationBlend = 0f;
 
       // normalise input direction
@@ -346,10 +345,10 @@ namespace StarterAssets
       Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * Vector3.forward;
 
       // move the player
-      _controller.Move(targetDirection.normalized * (_speed * Runner.DeltaTime) +
-                       new Vector3(0.0f, _verticalVelocity, 0.0f) * Runner.DeltaTime);
+      _controller.Move(targetDirection.normalized * (_speed * Time.deltaTime) +
+                       new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
 
-      // moving = targetDirection.normalized * (_speed * Runner.DeltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Runner.DeltaTime;
+      // moving = targetDirection.normalized * (_speed * Time.deltaTime) + new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime;
     }
 
     private void JumpAndGravity(NetworkInputData _input)
@@ -376,7 +375,7 @@ namespace StarterAssets
         // jump timeout
         if (_jumpTimeoutDelta >= 0.0f)
         {
-          _jumpTimeoutDelta -= Runner.DeltaTime;
+          _jumpTimeoutDelta -= Time.deltaTime;
         }
       }
       else
@@ -387,7 +386,7 @@ namespace StarterAssets
         // fall timeout
         if (_fallTimeoutDelta >= 0.0f)
         {
-          _fallTimeoutDelta -= Runner.DeltaTime;
+          _fallTimeoutDelta -= Time.deltaTime;
         }
 
         // if we are not grounded, do not jump
@@ -397,7 +396,7 @@ namespace StarterAssets
       // apply gravity over time if under terminal (multiply by delta time twice to linearly speed up over time)
       if (_verticalVelocity < _terminalVelocity)
       {
-        _verticalVelocity += Gravity * Runner.DeltaTime;
+        _verticalVelocity += Gravity * Time.deltaTime;
       }
     }
 

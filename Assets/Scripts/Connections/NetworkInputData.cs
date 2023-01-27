@@ -4,8 +4,8 @@ using Fusion;
 public struct NetworkInputData : INetworkInput
 {
   public Vector2 move;
-  public bool jump;
-  public bool sprint;
-  public bool analogMovement;
+  public NetworkBool jump;
+  public NetworkBool sprint;
+  public NetworkBool analogMovement;
   public Vector2 look;
 }

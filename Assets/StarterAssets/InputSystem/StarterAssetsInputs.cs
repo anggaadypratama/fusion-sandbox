@@ -11,11 +11,11 @@ namespace StarterAssets
     [Header("Character Input Values")]
     public Vector2 move;
     public Vector2 look;
-    public bool jump;
-    public bool sprint;
+    public NetworkBool jump;
+    public NetworkBool sprint;
 
     [Header("Movement Settings")]
-    public bool analogMovement;
+    public NetworkBool analogMovement;
 
     [Header("Mouse Cursor Settings")]
     public bool cursorLocked = true;
@@ -27,7 +27,6 @@ namespace StarterAssets
       if (Object.HasInputAuthority)
       {
         MoveInput(value.Get<Vector2>());
-        Debug.Log(value.Get<Vector2>());
       }
     }
 
@@ -68,6 +67,8 @@ namespace StarterAssets
 
     public void SprintInput(bool newSprintState)
     {
+      Debug.Log(newSprintState + " OnSprint StarterInput");
+
       sprint = newSprintState;
     }
 
